@@ -5,11 +5,11 @@ struct vector_int {
   int    *base;
   size_t nitems;
 };
-typedef struct vector_int vector_int;
+typedef struct vector_int vector_int_t;
 
 static const int INVALID_INDEX = -1;
 
-int bsearch (vector_int *value, int x, ...) {
+int bsearch (vector_int_t *value, int x, ...) {
   if (!value) {
     return INVALID_INDEX;
   }
@@ -43,7 +43,7 @@ int bsearch (vector_int *value, int x, ...) {
 }
 
 int unittest(int *values, int nitems, int x) {
-    vector_int v;
+    vector_int_t v;
     v.base = values;
     v.nitems = nitems;
     return bsearch( &v, x);
@@ -60,4 +60,5 @@ int main( int argc, char** argv) {
     printf("result: %d\n", unittest( &values[0], ntitems, 100));
     printf("result: %d\n", unittest( &values[0], ntitems, 1000));
     printf("result: %d\n", unittest( &values[0], ntitems, INT_MAX));
+    return 0;
 }
