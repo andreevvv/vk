@@ -1,10 +1,27 @@
 #include <limits.h>
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
 
 static const long MAX_FILE_SIZE = 128L * 1024L * 1024L;
 static const long INVALID_FILE_SIZE = -1L;
+
+static const char MIN_CHAR = 32;
+static const char MAX_CHAR = 127;
+static const char CHAR_NEW_LINE = '\n';
+
+bool is_valid_str( char *str) {
+  char *ptr;
+
+  for (ptr = str; *ptr; ++ptr) {
+    if (*ptr >= MAX_CHAR || *ptr <= MIN_CHAR && *ptr != CHAR_NEW_LINE) {
+      return false;
+    }
+  }
+  return true;
+}
+
 
 uint32_t jenkins_one_at_a_time_hash (char *key, size_t len) {
   uint32_t hash, i;
@@ -34,6 +51,7 @@ typedef struct avl_tree avl_tree_t;
 avl_tree_t *avl_create();
 avl_node_t *avl_create_node();
 void avl_insert (avl_tree_t *tree, uint32_t hash);
+
 
 int main( int argc, char** argv) {
     FILE *file = NULL;
@@ -70,7 +88,7 @@ int main( int argc, char** argv) {
     rewind( file);
 
     while ((str_read = getline( &str, &str_len, file)) != -1) {
-      printf("len %zu : %s\n", str_read, str);
+      printf("Is valid: %d\n", is_valid_str(str));
     }
 
     fclose( file);
