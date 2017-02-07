@@ -26,6 +26,7 @@ bool is_valid_str (char *str) {
 
 uint32_t jenkins_one_at_a_time_hash (char *key, size_t len) {
   uint32_t hash, i;
+
   for (hash = i = 0; i < len; ++i) {
     hash += key[i];
     hash += (hash << 10);
@@ -40,7 +41,7 @@ uint32_t jenkins_one_at_a_time_hash (char *key, size_t len) {
 struct avl_node {
   struct avl_node *left;
   struct avl_node *right;
-  uint32_t        *hash;
+  uint32_t        hash;
 };
 typedef struct avl_node avl_node_t;
 
@@ -49,10 +50,61 @@ struct avl_tree {
 };
 typedef struct avl_tree avl_tree_t;
 
-avl_tree_t *avl_create();
-avl_node_t *avl_create_node();
-void avl_insert (avl_tree_t *tree, uint32_t hash);
+avl_tree_t *avl_create_tree() {
+  avl_tree_t *tree = NULL;
 
+  if ((tree = malloc( sizeof(avl_tree_t))) == NULL) {
+    return NULL;
+   }
+  tree->root = NULL;
+  return tree;
+}
+
+avl_node_t *avl_create_node() {
+  avl_node_t *node = NULL;
+
+  if ((node = malloc( sizeof( avl_node_t))) == NULL) {
+    return NULL;
+  }
+  node->left = NULL;
+  node->right = NULL;
+  node->hash = 0;
+  return node;
+}
+
+void avl_destroy_node(avl_node_t *node) {
+  if (node == NULL) {
+    return;
+  }
+  avl_destroy_node( node->left);
+  avl_destroy_node( node->right);
+  free( node);
+}
+
+void avl_insert_node (avl_tree_t *tree, uint32_t hash) {
+//TODO: implement code
+}
+
+avl_node_t *avl_find_node (avl_tree_t *tree, uint32_t hash) {
+  avl_node_t *cur = tree->root;
+
+  while (cur && cur->hash != hash) {
+    if (hash > cur->hash) {
+      cur = cur->right;
+    }
+    else {
+      cur = cur->left;
+    }
+  }
+  return cur;
+}
+
+void avl_destroy_tree (avl_tree_t *tree) {
+    avl_node_t *cur = tree->root;
+    if (cur) {
+      avl_destroy_node( cur);
+    }
+}
 
 int main (int argc, char** argv) {
     FILE *file = NULL;
@@ -62,6 +114,7 @@ int main (int argc, char** argv) {
     ssize_t str_read = 0;
     unsigned long line_num = 0L;
     uint32_t hash = 0;
+    avl_tree_t *tree = NULL;
 
     if (argc < 2) {
       printf("Usage: strsearch filename\n");
@@ -94,11 +147,23 @@ int main (int argc, char** argv) {
     }
     rewind( file);
 
+    tree = avl_create_tree();
+    if(!tree) {
+      printf("Error memory allocation\n");
+      return 1;
+    }
+
     while ((str_read = getline( &str, &str_len, file)) != -1) {
       if (is_valid_str( str)) {
         hash = jenkins_one_at_a_time_hash( str, str_len);
-        printf("Line: %lu hash: %" PRIu32 "\n", line_num, hash);
-        ++line_num;
+        if (avl_find_node( tree, hash) ) {
+          printf("YES\n");
+        } else {
+          printf("NO\n");
+          avl_insert_node( tree, hash);
+        }
+        /*printf("Line: %lu hash: %" PRIu32 "\n", line_num, hash);*/
+        /*++line_num;*/
       } else {
         printf("Line: %lu the string contains invalid data: %s", line_num, str);
         fclose( file);
@@ -106,6 +171,7 @@ int main (int argc, char** argv) {
       }
     }
 
+    avl_destroy_tree( tree);
     fclose( file);
     return 0;
 }
