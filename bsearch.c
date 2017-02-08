@@ -51,16 +51,16 @@ int unittest (int *values, int nitems, int x) {
 }
 
 // main function impemenation
-int main (int argc, char** argv) {
-    int values[] = { INT_MIN, -1000, -100, -1, -1, 0, 1, 2, 2, 10, 100, 100, 1000, INT_MAX };
-    size_t ntitems = sizeof(values) / sizeof(values[0]);
-    printf("result: %d\n", unittest( &values[0], ntitems, INT_MIN));
-    printf("result: %d\n", unittest( &values[0], ntitems, -1000));
-    printf("result: %d\n", unittest( &values[0], ntitems, -2));
-    printf("result: %d\n", unittest( &values[0], ntitems, 0));
-    printf("result: %d\n", unittest( &values[0], ntitems, 5));
-    printf("result: %d\n", unittest( &values[0], ntitems, 100));
-    printf("result: %d\n", unittest( &values[0], ntitems, 1000));
-    printf("result: %d\n", unittest( &values[0], ntitems, INT_MAX));
-    return 0;
+int main (int argc, char **argv) {
+  int values[] = { INT_MIN, -1000, -100, -1, -1, 0, 1, 2, 2, 10, 100, 100, 1000, INT_MAX };
+  size_t ntitems = sizeof(values) / sizeof(values[0]);
+  printf("result: %d\n", unittest( &values[0], ntitems, INT_MIN));
+  printf("result: %d\n", unittest( &values[0], ntitems, -1000));
+  printf("result: %d\n", unittest( &values[0], ntitems, -2));
+  printf("result: %d\n", unittest( &values[0], ntitems, 0));
+  printf("result: %d\n", unittest( &values[0], ntitems, 5));
+  printf("result: %d\n", unittest( &values[0], ntitems, 100));
+  printf("result: %d\n", unittest( &values[0], ntitems, 1000));
+  printf("result: %d\n", unittest( &values[0], ntitems, INT_MAX));
+  return 0;
 }

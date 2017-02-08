@@ -248,77 +248,77 @@ avl_node_t *avl_find_node (avl_tree_t *tree, uint32_t hash) {
 }
 
 // main function impemenation
-int main (int argc, char** argv) {
-    FILE *file = NULL;
-    long fsize = 0L;
-    char *str = NULL;
-    size_t str_len = 0;
-    ssize_t str_read = 0;
-    unsigned long line_num = 0L;
-    uint32_t hash = 0;
-    avl_tree_t *tree = NULL;
+int main (int argc, char **argv) {
+  FILE *file = NULL;
+  long fsize = 0L;
+  char *str = NULL;
+  size_t str_len = 0;
+  ssize_t str_read = 0;
+  unsigned long line_num = 0L;
+  uint32_t hash = 0;
+  avl_tree_t *tree = NULL;
 
-    if (argc < 2) {
-      printf("Usage: strsearch filename\n");
-      return 0;
-    }
-
-    file = fopen( argv[1], "r");
-    if (!file) {
-      printf("Error while opening file: %s\n", argv[1]);
-      return 1;
-    }
-
-    if (fseek( file, 0, SEEK_END) != 0) {
-      printf("Error while seek end file: %s\n", argv[1]);
-      fclose( file);
-      return 1;
-    }
-
-    fsize = ftell( file);
-    if (INVALID_FILE_SIZE == fsize) {
-      printf("Error file size: %s\n", argv[1]);
-      fclose( file);
-      return 1;
-    }
-
-    if (fsize > MAX_FILE_SIZE) {
-      printf("The %s file size %ld bigger than %ld\n", argv[1], fsize, MAX_FILE_SIZE);
-      fclose( file);
-      return 1;
-    }
-    rewind( file);
-
-    tree = avl_create_tree();
-    if(!tree) {
-      printf("Error memory allocation\n");
-      fclose( file);
-      return 1;
-    }
-
-    while ((str_read = getline( &str, &str_len, file)) != -1) {
-      if (is_valid_str( str)) {
-        hash = jenkins_one_at_a_time_hash( str, str_read);
-        if (avl_find_node( tree, hash) ) {
-          printf("YES\n");
-        } else {
-          printf("NO\n");
-          if (!avl_insert_node( tree, hash)) {
-            printf("Error memory allocation\n");
-            fclose( file);
-            return 1;
-          }
-        }
-        /*printf("Line: %lu hash: %" PRIu32 " %s\n", line_num, hash, str);*/
-        ++line_num;
-      } else {
-        printf("Line: %lu the string contains invalid data: %s", line_num, str);
-        fclose( file);
-        return 1;
-      }
-    }
-
-    avl_destroy_tree( tree);
-    fclose( file);
+  if (argc < 2) {
+    printf("Usage: strsearch filename\n");
     return 0;
+  }
+
+  file = fopen( argv[1], "r");
+  if (!file) {
+    printf("Error while opening file: %s\n", argv[1]);
+    return 1;
+  }
+
+  if (fseek( file, 0, SEEK_END) != 0) {
+    printf("Error while seek end file: %s\n", argv[1]);
+    fclose( file);
+    return 1;
+  }
+
+  fsize = ftell( file);
+  if (INVALID_FILE_SIZE == fsize) {
+    printf("Error file size: %s\n", argv[1]);
+    fclose( file);
+    return 1;
+  }
+
+  if (fsize > MAX_FILE_SIZE) {
+    printf("The %s file size %ld bigger than %ld\n", argv[1], fsize, MAX_FILE_SIZE);
+    fclose( file);
+    return 1;
+  }
+  rewind( file);
+
+  tree = avl_create_tree();
+  if (!tree) {
+    printf("Error memory allocation\n");
+    fclose( file);
+    return 1;
+  }
+
+  while ((str_read = getline( &str, &str_len, file)) != -1) {
+    if (is_valid_str( str)) {
+      hash = jenkins_one_at_a_time_hash( str, str_read);
+      if (avl_find_node( tree, hash) ) {
+        printf("YES\n");
+      } else {
+        printf("NO\n");
+        if (!avl_insert_node( tree, hash)) {
+          printf("Error memory allocation\n");
+          fclose( file);
+          return 1;
+        }
+      }
+      /*printf("Line: %lu hash: %" PRIu32 " %s\n", line_num, hash, str);*/
+      ++line_num;
+    } else {
+      printf("Line: %lu the string contains invalid data: %s", line_num, str);
+      fclose( file);
+      return 1;
+    }
+  }
+
+  avl_destroy_tree( tree);
+  fclose( file);
+  return 0;
 }
