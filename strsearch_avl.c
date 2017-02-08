@@ -42,8 +42,8 @@ uint32_t jenkins_one_at_a_time_hash (char *key, size_t len) {
 }
 
 // const for avl tree
-static const int AVL_HEGIGHT_DIFF_2 = 2;
-static const int AVL_HEGIGHT_DIFF_1 = 1;
+static const int AVL_HEIGHT_DIFF_2 = 2;
+static const int AVL_HEIGHT_DIFF_1 = 1;
 
 // struct for avl tree
 struct avl_node {
@@ -147,7 +147,7 @@ avl_node_t *avl_rotate_rightleft_node (avl_node_t *node) {
   avl_node_t *left = right->left;
 
   node->right = left->left;
-  right->left = left->right; 
+  right->left = left->right;
   left->right = right;
   left->left = node;
   return left;
@@ -174,14 +174,14 @@ avl_node_t *avl_balance_node (avl_node_t *node) {
 
   balance_factor = avl_balance_factor_node( node);
 
-  if (balance_factor >= AVL_HEGIGHT_DIFF_2) {
-    if (avl_balance_factor_node( node->left) <= -AVL_HEGIGHT_DIFF_1) {
+  if (balance_factor >= AVL_HEIGHT_DIFF_2) {
+    if (avl_balance_factor_node( node->left) <= -AVL_HEIGHT_DIFF_1) {
        root = avl_rotate_leftright_node( node);
     } else {
        root = avl_rotate_leftleft_node( node);
     }
-  } else if (balance_factor <= -AVL_HEGIGHT_DIFF_2) {
-    if (avl_balance_factor_node( node->right) >= AVL_HEGIGHT_DIFF_1) {
+  } else if (balance_factor <= -AVL_HEIGHT_DIFF_2) {
+    if (avl_balance_factor_node( node->right) >= AVL_HEIGHT_DIFF_1) {
       root = avl_rotate_rightleft_node( node);
     } else {
       root = avl_rotate_rightright_node( node);
