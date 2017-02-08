@@ -2,7 +2,7 @@ CC = gcc
 CFLAGS = -O3
 
 TASK1 = bsearch
-TASK2 = strsearch
+TASK2 = strsearch_avl
 
 all: $(TASK1) $(TASK2)
 

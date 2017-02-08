@@ -51,19 +51,19 @@ struct avl_tree {
 typedef struct avl_tree avl_tree_t;
 
 avl_tree_t *avl_create_tree() {
-  avl_tree_t *tree = NULL;
+  avl_tree_t *tree = malloc( sizeof(avl_tree_t));
 
-  if ((tree = malloc( sizeof(avl_tree_t))) == NULL) {
+  if (!tree) {
     return NULL;
-   }
+  }
   tree->root = NULL;
   return tree;
 }
 
 avl_node_t *avl_create_node() {
-  avl_node_t *node = NULL;
+  avl_node_t *node =  malloc( sizeof( avl_node_t));
 
-  if ((node = malloc( sizeof( avl_node_t))) == NULL) {
+  if (!node) {
     return NULL;
   }
   node->left = NULL;
@@ -73,7 +73,7 @@ avl_node_t *avl_create_node() {
 }
 
 void avl_destroy_node(avl_node_t *node) {
-  if (node == NULL) {
+  if (!node) {
     return;
   }
   avl_destroy_node( node->left);
@@ -81,8 +81,63 @@ void avl_destroy_node(avl_node_t *node) {
   free( node);
 }
 
-void avl_insert_node (avl_tree_t *tree, uint32_t hash) {
-//TODO: implement code
+void avl_destroy_tree (avl_tree_t *tree) {
+    avl_node_t *cur = tree->root;
+    if (cur) {
+      avl_destroy_node( cur);
+    }
+}
+
+avl_node_t *avl_balance_node (avl_node_t *node) {
+  avl_node_t *root = NULL;
+  if (node->left) {
+    node->left  = avl_balance_node( node->left );
+  }
+  if (node->right) {
+    node->right = avl_balance_node( node->right );
+  }
+  return root;
+}
+
+void avl_balance_tree (avl_tree_t *tree) {
+  avl_node_t *root  = avl_balance_node( tree->root);
+  if (root != tree->root) {
+    tree->root = root;
+  }
+}
+
+bool avl_insert_node (avl_tree_t *tree, uint32_t hash) {
+  avl_node_t *next = NULL;
+  avl_node_t *last = NULL;
+  avl_node_t *node = avl_create_node();
+  if (!node) {
+    return false;
+  }
+
+  if (!tree->root) {
+    node->hash = hash;
+    tree->root = node;
+  } else {
+    next = tree->root;
+    while (next) {
+      last = next;
+      if (hash < next->hash ) {
+        next = next->left;
+      }
+      else if (hash > next->hash ) {
+             next = next->right;
+      }
+    }
+    node->hash = hash;
+    if (hash < last->hash) {
+      last->left = node;
+    }
+    if (hash > last->hash) {
+      last->right = node;
+    }
+  }
+  avl_balance_tree( tree);
+  return true;
 }
 
 avl_node_t *avl_find_node (avl_tree_t *tree, uint32_t hash) {
@@ -97,13 +152,6 @@ avl_node_t *avl_find_node (avl_tree_t *tree, uint32_t hash) {
     }
   }
   return cur;
-}
-
-void avl_destroy_tree (avl_tree_t *tree) {
-    avl_node_t *cur = tree->root;
-    if (cur) {
-      avl_destroy_node( cur);
-    }
 }
 
 int main (int argc, char** argv) {
