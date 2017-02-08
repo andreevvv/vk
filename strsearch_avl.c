@@ -299,7 +299,7 @@ int main (int argc, char **argv) {
   while ((str_read = getline( &str, &str_len, file)) != -1) {
     if (is_valid_str( str)) {
       hash = jenkins_one_at_a_time_hash( str, str_read);
-      if (avl_find_node( tree, hash) ) {
+      if (avl_find_node( tree, hash)) {
         printf("YES\n");
       } else {
         printf("NO\n");

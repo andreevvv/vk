@@ -86,6 +86,26 @@ void trie_destroy_tree (trie_tree_t *tree){
     }
 }
 
+trie_node_t *trie_find_node (trie_tree_t *tree, char *str, size_t str_len) {
+  trie_node_t *cur = tree->root;
+  int i = 0;
+  char value = 0;
+
+  for (; i < str_len; ++i) {
+    if (!cur) {
+      return NULL;
+    }
+    value = str[i];
+    cur = cur->next[value];
+  }
+
+  return cur;
+}
+
+bool trie_insert_node (trie_tree_t *tree, char *str, size_t str_len) {
+  return true;
+}
+
 // main function impemenation
 int main (int argc, char **argv) {
   FILE *file = NULL;
@@ -136,9 +156,16 @@ int main (int argc, char **argv) {
 
   while ((str_read = getline( &str, &str_len, file)) != -1) {
     if (is_valid_str( str)) {
-      // TODO: add find and insert in trie here
-      //printf("YES\n");
-      //printf("NO\n");
+      if (trie_find_node( tree, str, str_read)) {
+        printf("YES\n");
+      } else {
+        printf("NO\n");
+        if (!trie_insert_node( tree, str, str_read)) {
+          printf("Error memory allocation\n");
+          fclose( file);
+          return 1;
+        }
+      }
       /*printf("Line: %lu hash: %" PRIu32 " %s\n", line_num, hash, str);*/
       ++line_num;
     } else {
@@ -146,8 +173,7 @@ int main (int argc, char **argv) {
       fclose( file);
       return 1;
     }
-  }
-  
+  }  
   trie_destroy_tree( tree);
   fclose( file);
   return 0;
