@@ -10,9 +10,9 @@ static const long MAX_FILE_SIZE = 128L * 1024L * 1024L;
 static const long INVALID_FILE_SIZE = -1L;
 
 // const for string validation
-static const char MIN_CHAR = 32;
-static const char MAX_CHAR = 127;
-static const char CHAR_NEW_LINE = '\n';
+#define MIN_CHAR 32
+#define MAX_CHAR 127
+#define CHAR_NEW_LINE '\n'
 
 // string validation
 bool is_valid_str (char *str) {
@@ -26,7 +26,65 @@ bool is_valid_str (char *str) {
   return true;
 }
 
-// TODO: add trie implementaion here
+// struct for trie tree
+#define CHAR_COUNT (MAX_CHAR - MIN_CHAR)
+
+struct trie_node {
+  struct trie_node *next[CHAR_COUNT];
+  int              use_count;
+  char             value;
+};
+
+typedef struct trie_node trie_node_t;
+
+struct trie_tree {
+  struct trie_node *root;
+};
+
+typedef struct trie_tree trie_tree_t;
+
+// trie tree implemenation
+trie_tree_t *trie_create_tree() {
+   trie_tree_t *tree = malloc( sizeof(trie_tree_t));
+
+  if (!tree) {
+    return NULL;
+  }
+  tree->root = NULL;
+  return tree;
+}
+
+trie_node_t *trie_create_node() {
+  trie_node_t *node =  malloc( sizeof( trie_node_t));
+  int i = 0;
+
+  if (!node) {
+    return NULL;
+  }
+  node->use_count = 0;  
+  node->value = 0;
+  for (; i < CHAR_COUNT; ++i) {
+    node->next[i] = NULL;
+  }
+  return node;
+}
+
+void trie_destroy_node (trie_node_t *node) {
+  int i  =0;
+  for (; i < CHAR_COUNT; ++i) {
+    if (node->next[i]) {
+      trie_destroy_node( node->next[i]);
+    }
+  }
+}
+
+void trie_destroy_tree (trie_tree_t *tree){
+   trie_node_t *cur = tree->root;
+
+    if (cur) {
+      trie_destroy_node( cur);
+    }
+}
 
 // main function impemenation
 int main (int argc, char **argv) {
@@ -36,6 +94,7 @@ int main (int argc, char **argv) {
   size_t str_len = 0;
   ssize_t str_read = 0;
   unsigned long line_num = 0L;
+  trie_tree_t *tree = NULL;
 
   if (argc < 2) {
     printf("Usage: strsearch filename\n");
@@ -68,7 +127,12 @@ int main (int argc, char **argv) {
   }
   rewind( file);
 
-  // TODO: add create trie hare
+  tree = trie_create_tree();
+  if (!tree) {
+    printf("Error memory allocation\n");
+    fclose( file);
+    return 1;
+  }
 
   while ((str_read = getline( &str, &str_len, file)) != -1) {
     if (is_valid_str( str)) {
@@ -83,7 +147,8 @@ int main (int argc, char **argv) {
       return 1;
     }
   }
-
+  
+  trie_destroy_tree( tree);
   fclose( file);
   return 0;
 }
