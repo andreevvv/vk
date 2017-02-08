@@ -27,11 +27,9 @@ int bsearch (vector_int_t *value, int x, ...) {
     middle = (left + right) >> 1;
     if (value->base[middle] < x) {
       left = middle + 1;
-    }
-    else if (value->base[middle] > x) {
+    } else if (value->base[middle] > x) {
       right = middle;
-    }
-    else {
+    } else {
       while (middle <= right) {
         if (value->base[middle] > x) {
           return middle;

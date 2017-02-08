@@ -218,8 +218,7 @@ bool avl_insert_node (avl_tree_t *tree, uint32_t hash) {
       last = next;
       if (hash < next->hash ) {
         next = next->left;
-      }
-      else if (hash > next->hash ) {
+      } else if (hash > next->hash ) {
              next = next->right;
       }
     }
@@ -241,8 +240,7 @@ avl_node_t *avl_find_node (avl_tree_t *tree, uint32_t hash) {
   while (cur && cur->hash != hash) {
     if (hash > cur->hash) {
       cur = cur->right;
-    }
-    else {
+    } else {
       cur = cur->left;
     }
   }
