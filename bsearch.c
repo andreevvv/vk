@@ -24,12 +24,13 @@ int bsearch (vector_int_t *value, int x, ...) {
   }
 
   while (left < right) {
-    middle = (left + right) >> 1;
+    middle = left + (right - left) / 2;
     if (value->base[middle] < x) {
       left = middle + 1;
     } else if (value->base[middle] > x) {
       right = middle;
     } else {
+      // TODO: optimaze n to log(n)
       while (middle <= right) {
         if (value->base[middle] > x) {
           return middle;
