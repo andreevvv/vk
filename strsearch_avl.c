@@ -5,13 +5,16 @@
 #include <stdio.h>
 #include <inttypes.h>
 
+// const for file validation
 static const long MAX_FILE_SIZE = 128L * 1024L * 1024L;
 static const long INVALID_FILE_SIZE = -1L;
 
+// const for string validation
 static const char MIN_CHAR = 32;
 static const char MAX_CHAR = 127;
 static const char CHAR_NEW_LINE = '\n';
 
+// string validation
 bool is_valid_str (char *str) {
   char *ptr;
 
@@ -23,7 +26,7 @@ bool is_valid_str (char *str) {
   return true;
 }
 
-
+// jenkins hash calculation
 uint32_t jenkins_one_at_a_time_hash (char *key, size_t len) {
   uint32_t hash, i;
 
@@ -38,6 +41,11 @@ uint32_t jenkins_one_at_a_time_hash (char *key, size_t len) {
   return hash;
 }
 
+// const for avl tree
+static const int AVL_HEGIGHT_DIFF_2 = 2;
+static const int AVL_HEGIGHT_DIFF_1 = 1;
+
+// struct for avl tree
 struct avl_node {
   struct avl_node *left;
   struct avl_node *right;
@@ -50,6 +58,7 @@ struct avl_tree {
 };
 typedef struct avl_tree avl_tree_t;
 
+// avl tree implemenation
 avl_tree_t *avl_create_tree() {
   avl_tree_t *tree = malloc( sizeof(avl_tree_t));
 
@@ -83,24 +92,109 @@ void avl_destroy_node(avl_node_t *node) {
 
 void avl_destroy_tree (avl_tree_t *tree) {
     avl_node_t *cur = tree->root;
+
     if (cur) {
       avl_destroy_node( cur);
     }
 }
 
-avl_node_t *avl_balance_node (avl_node_t *node) {
-  avl_node_t *root = NULL;
+int avl_height_node (avl_node_t *node) {
+  int height_left = 1;
+  int height_right = 1;
+
   if (node->left) {
-    node->left  = avl_balance_node( node->left );
+    height_left = avl_height_node( node->left);
   }
   if (node->right) {
-    node->right = avl_balance_node( node->right );
+    height_right = avl_height_node( node->right);
+  }
+  return height_right > height_left ? height_right : height_left;
+}
+
+int avl_balance_factor_node (avl_node_t *node) {
+  int balance_factor = 0;
+
+  if (node->left) {
+    balance_factor += avl_height_node( node->left);
+  }
+  if (node->right) {
+    balance_factor -= avl_height_node( node->right );
+  }
+  return balance_factor;
+}
+
+avl_node_t *avl_rotate_leftleft_node (avl_node_t *node) {
+  avl_node_t *left = node->left;
+
+  node->left = left->right;
+  left->right = node;
+  return left;
+}
+
+avl_node_t *avl_rotate_leftright_node (avl_node_t *node) {
+  avl_node_t *left = node->left;
+  avl_node_t *right = left->right;
+
+  node->left = right->right;
+  left->right = right->left;
+  right->left = left;
+  right->right = node;
+  return right;
+}
+
+avl_node_t *avl_rotate_rightleft_node (avl_node_t *node) {
+  avl_node_t *right = node->right;
+  avl_node_t *left = right->left;
+
+  node->right = left->left;
+  right->left = left->right; 
+  left->right = right;
+  left->left = node;
+  return left;
+}
+
+avl_node_t *avl_rotate_rightright_node (avl_node_t *node) {
+  avl_node_t *right = node->right;
+
+  node->right = right->left;
+  right->left = node;
+  return right;
+}
+
+avl_node_t *avl_balance_node (avl_node_t *node) {
+  avl_node_t *root = NULL;
+  int balance_factor = 0;
+
+  if (node->left) {
+    node->left  = avl_balance_node( node->left);
+  }
+  if (node->right) {
+    node->right = avl_balance_node( node->right);
+  }
+
+  balance_factor = avl_balance_factor_node( node);
+
+  if (balance_factor >= AVL_HEGIGHT_DIFF_2) {
+    if (avl_balance_factor_node( node->left) <= -AVL_HEGIGHT_DIFF_1) {
+       root = avl_rotate_leftright_node( node);
+    } else {
+       root = avl_rotate_leftleft_node( node);
+    }
+  } else if (balance_factor <= -AVL_HEGIGHT_DIFF_2) {
+    if (avl_balance_factor_node( node->right) >= AVL_HEGIGHT_DIFF_1) {
+      root = avl_rotate_rightleft_node( node);
+    } else {
+      root = avl_rotate_rightright_node( node);
+    }
+  } else {
+    root = node;
   }
   return root;
 }
 
 void avl_balance_tree (avl_tree_t *tree) {
   avl_node_t *root  = avl_balance_node( tree->root);
+
   if (root != tree->root) {
     tree->root = root;
   }
@@ -110,6 +204,7 @@ bool avl_insert_node (avl_tree_t *tree, uint32_t hash) {
   avl_node_t *next = NULL;
   avl_node_t *last = NULL;
   avl_node_t *node = avl_create_node();
+
   if (!node) {
     return false;
   }
@@ -154,6 +249,7 @@ avl_node_t *avl_find_node (avl_tree_t *tree, uint32_t hash) {
   return cur;
 }
 
+// main function impemenation
 int main (int argc, char** argv) {
     FILE *file = NULL;
     long fsize = 0L;
@@ -198,24 +294,29 @@ int main (int argc, char** argv) {
     tree = avl_create_tree();
     if(!tree) {
       printf("Error memory allocation\n");
+      fclose( file);
       return 1;
     }
 
     while ((str_read = getline( &str, &str_len, file)) != -1) {
       if (is_valid_str( str)) {
-        hash = jenkins_one_at_a_time_hash( str, str_len);
+        hash = jenkins_one_at_a_time_hash( str, str_read);
         if (avl_find_node( tree, hash) ) {
           printf("YES\n");
         } else {
           printf("NO\n");
-          avl_insert_node( tree, hash);
+          if (!avl_insert_node( tree, hash)) {
+            printf("Error memory allocation\n");
+            fclose( file);
+            return 1;
+          }
         }
-        /*printf("Line: %lu hash: %" PRIu32 "\n", line_num, hash);*/
-        /*++line_num;*/
+        /*printf("Line: %lu hash: %" PRIu32 " %s\n", line_num, hash, str);*/
+        ++line_num;
       } else {
         printf("Line: %lu the string contains invalid data: %s", line_num, str);
         fclose( file);
-        return 0;
+        return 1;
       }
     }
 

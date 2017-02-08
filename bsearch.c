@@ -1,6 +1,7 @@
 #include <limits.h>
 #include <stdio.h>
 
+// struct for binary search
 struct vector_int {
   int    *base;
   size_t nitems;
@@ -9,6 +10,7 @@ typedef struct vector_int vector_int_t;
 
 static const int INVALID_INDEX = -1;
 
+// binary search implementation
 int bsearch (vector_int_t *value, int x, ...) {
   if (!value) {
     return INVALID_INDEX;
@@ -42,6 +44,7 @@ int bsearch (vector_int_t *value, int x, ...) {
   return INVALID_INDEX;
 }
 
+// wrap for unit tasting
 int unittest (int *values, int nitems, int x) {
     vector_int_t v;
     v.base = values;
@@ -49,6 +52,7 @@ int unittest (int *values, int nitems, int x) {
     return bsearch( &v, x);
 }
 
+// main function impemenation
 int main (int argc, char** argv) {
     int values[] = { INT_MIN, -1000, -100, -1, -1, 0, 1, 2, 2, 10, 100, 100, 1000, INT_MAX };
     size_t ntitems = sizeof(values) / sizeof(values[0]);
