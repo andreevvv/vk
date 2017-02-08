@@ -10,6 +10,21 @@ typedef struct vector_int vector_int_t;
 
 static const int INVALID_INDEX = -1;
 
+int bsearch_1st_big_value (vector_int_t *value, size_t left, size_t right, int x) {
+  while (left != right) {
+    size_t middle = left + (right - left) / 2;
+    if (value->base[middle] <= x) {
+      left = middle + 1;
+    } else {
+      right = middle; 
+    }
+  }
+  if (value->base[right] > x) {
+    return right;
+  }
+  return INVALID_INDEX;
+}
+
 // binary search implementation
 int bsearch (vector_int_t *value, int x, ...) {
   if (!value) {
@@ -30,14 +45,7 @@ int bsearch (vector_int_t *value, int x, ...) {
     } else if (value->base[middle] > x) {
       right = middle;
     } else {
-      // TODO: optimaze n to log(n)
-      while (middle <= right) {
-        if (value->base[middle] > x) {
-          return middle;
-        }
-        ++middle;
-      }
-      return INVALID_INDEX;
+      return bsearch_1st_big_value( value, middle, right, x);
     }
   }
   return INVALID_INDEX;

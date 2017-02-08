@@ -70,7 +70,8 @@ trie_node_t *trie_create_node() {
 }
 
 void trie_destroy_node (trie_node_t *node) {
-  int i  =0;
+  int i = 0;
+  
   for (; i < CHAR_COUNT; ++i) {
     if (node->next[i]) {
       trie_destroy_node( node->next[i]);
