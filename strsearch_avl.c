@@ -5,32 +5,33 @@
 #include <stdio.h>
 #include <inttypes.h>
 
-// const for file validation
-static const long MAX_FILE_SIZE = 128L * 1024L * 1024L;
-static const long INVALID_FILE_SIZE = -1L;
+/* const for file validation */
+#define MAX_FILE_SIZE 128L * 1024L * 1024L
+#define INVALID_FILE_SIZE -1L
 
-// const for string validation
-static const char MIN_CHAR = 32;
-static const char MAX_CHAR = 127;
-static const char CHAR_NEW_LINE = '\n';
+/* const for string validation */
+#define MIN_CHAR 32
+#define MAX_CHAR 127
+#define CHAR_NEW_LINE '\n'
 
-// string validation
-bool is_valid_str (char *str) {
-  char *ptr;
+/* string validation */
+bool is_valid_str (char *str, ssize_t str_len) {
+  ssize_t i = 0;
 
-  for (ptr = str; *ptr; ++ptr) {
-    if (*ptr >= MAX_CHAR || *ptr <= MIN_CHAR && *ptr != CHAR_NEW_LINE) {
+  for (; i < str_len; ++i) {
+    if (str[i] >= MAX_CHAR || str[i] <= MIN_CHAR && str[i] != CHAR_NEW_LINE) {
       return false;
     }
   }
   return true;
 }
 
-// jenkins hash calculation
-uint32_t jenkins_one_at_a_time_hash (char *key, size_t len) {
-  uint32_t hash, i;
+/* jenkins hash calculation */
+uint32_t jenkins_one_at_a_time_hash (char *key, ssize_t len) {
+  uint32_t hash = 0;
+  ssize_t i = 0;
 
-  for (hash = i = 0; i < len; ++i) {
+  for (; i < len; ++i) {
     hash += key[i];
     hash += (hash << 10);
     hash ^= (hash >> 6);
@@ -41,11 +42,11 @@ uint32_t jenkins_one_at_a_time_hash (char *key, size_t len) {
   return hash;
 }
 
-// const for avl tree
+/* const for avl tree */
 static const int AVL_HEIGHT_DIFF_2 = 2;
 static const int AVL_HEIGHT_DIFF_1 = 1;
 
-// struct for avl tree
+/* struct for avl tree */
 struct avl_node {
   struct avl_node *left;
   struct avl_node *right;
@@ -58,7 +59,7 @@ struct avl_tree {
 };
 typedef struct avl_tree avl_tree_t;
 
-// avl tree implemenation
+/* avl tree implemenation */
 avl_tree_t *avl_create_tree() {
   avl_tree_t *tree = malloc( sizeof(avl_tree_t));
 
@@ -247,7 +248,7 @@ avl_node_t *avl_find_node (avl_tree_t *tree, uint32_t hash) {
   return cur;
 }
 
-// main function impemenation
+/* main function impemenation */
 int main (int argc, char **argv) {
   FILE *file = NULL;
   long fsize = 0L;
@@ -297,7 +298,7 @@ int main (int argc, char **argv) {
   }
 
   while ((str_read = getline( &str, &str_len, file)) != -1) {
-    if (is_valid_str( str)) {
+    if (is_valid_str( str, str_read)) {
       hash = jenkins_one_at_a_time_hash( str, str_read);
       if (avl_find_node( tree, hash)) {
         printf("YES\n");
