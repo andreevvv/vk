@@ -11,7 +11,7 @@ static const long INVALID_FILE_SIZE = -1L;
 
 // const for string validation
 #define MIN_CHAR 32
-#define MAX_CHAR 127
+#define MAX_CHAR 127 + 1
 #define CHAR_NEW_LINE '\n'
 
 // string validation
@@ -28,6 +28,7 @@ bool is_valid_str (char *str) {
 
 // struct for trie tree
 #define CHAR_COUNT (MAX_CHAR - MIN_CHAR)
+#define CHAR_INDEX(i) (MAX_CHAR - (i))
 
 struct trie_node {
   struct trie_node *next[CHAR_COUNT];
@@ -71,7 +72,7 @@ trie_node_t *trie_create_node() {
 
 void trie_destroy_node (trie_node_t *node) {
   int i = 0;
-  
+
   for (; i < CHAR_COUNT; ++i) {
     if (node->next[i]) {
       trie_destroy_node( node->next[i]);
@@ -89,23 +90,81 @@ void trie_destroy_tree (trie_tree_t *tree){
 
 trie_node_t *trie_find_node (trie_tree_t *tree, char *str, size_t str_len) {
   trie_node_t *cur = tree->root;
-  int i = 0;
-  char value = 0;
-
-  for (; i < str_len; ++i) {
+  char *p = str;
+ 
+  for (; *p != '\0'; ++p) {
     if (!cur) {
+     //printf("trie_find_node false\n");
       return NULL;
     }
-    value = str[i];
-    cur = cur->next[value];
+    printf("%c ", *p);
+    cur = cur->next[CHAR_INDEX(*p)];
   }
-
+  //printf("trie_find_node true %p\n", node);
   return cur;
 }
 
+void trie_insert_with_restore_node (trie_tree_t *tree, char *str, size_t str_len) {
+  trie_node_t *cur = tree->root;
+  trie_node_t **prev_ptr = &tree->root;
+  char *p = str;
+  trie_node_t *next_node;
+  trie_node_t **next_prev_ptr;
+
+  while (cur) {
+    next_prev_ptr = &cur->next[CHAR_INDEX(*p)];
+    next_node = *next_prev_ptr;
+    ++p;
+    --cur->use_count;
+
+    if (0 == cur->use_count) {
+      free(cur);
+
+      if (prev_ptr) {
+        *prev_ptr = NULL;
+      }
+
+      next_prev_ptr = NULL;
+    }
+    cur = next_node;
+    prev_ptr = next_prev_ptr;
+  }
+}
+
 bool trie_insert_node (trie_tree_t *tree, char *str, size_t str_len) {
+  trie_node_t **rcur = &tree->root;
+  trie_node_t *cur = NULL;
+  char *p = str;
+  char c = 0;
+  cur = trie_find_node( tree, str, str_len);
+
+  if (cur && cur->value != 0) {
+    return true;
+  }  
+  for (;;) {
+    cur = *rcur;
+    if (!cur) {
+      cur = trie_create_node();
+
+      if (!cur) {
+        trie_insert_with_restore_node( tree, str, str_len);
+        return 0;
+      }
+      cur->value = *p;
+      *rcur = cur;
+    }
+    ++cur->use_count;
+    c = *p;
+    //printf("%c ", c);
+    if (c == '\0') {      
+      break;
+    }
+    rcur = &cur->next[CHAR_INDEX(c)];
+    ++p;
+  }
   return true;
 }
+
 
 // main function impemenation
 int main (int argc, char **argv) {
