@@ -6,13 +6,13 @@
 #include <inttypes.h>
 
 /* const for file validation */
-#define MAX_FILE_SIZE 128L * 1024L * 1024L
-#define INVALID_FILE_SIZE -1L
+#define MAX_FILE_SIZE (128L * 1024L * 1024L)
+#define INVALID_FILE_SIZE (-1L)
 
 /* const for string validation */
-#define MIN_CHAR 32
-#define MAX_CHAR 127
-#define CHAR_NEW_LINE '\n'
+#define MIN_CHAR      (32)
+#define MAX_CHAR      (127)
+#define CHAR_NEW_LINE ('\n')
 
 /* string validation */
 bool is_valid_str (char *str, ssize_t str_len) {
@@ -43,8 +43,8 @@ uint32_t jenkins_one_at_a_time_hash (char *key, ssize_t len) {
 }
 
 /* const for avl tree */
-static const int AVL_HEIGHT_DIFF_2 = 2;
-static const int AVL_HEIGHT_DIFF_1 = 1;
+#define AVL_HEIGHT_DIFF_2 (2)
+#define AVL_HEIGHT_DIFF_1 (1)
 
 /* struct for avl tree */
 struct avl_node {

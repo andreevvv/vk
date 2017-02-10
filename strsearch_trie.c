@@ -6,17 +6,17 @@
 #include <inttypes.h>
 
 /* const for file validation */
-#define MAX_FILE_SIZE     128L * 1024L * 1024L
-#define INVALID_FILE_SIZE -1L
+#define MAX_FILE_SIZE     (128L * 1024L * 1024L)
+#define INVALID_FILE_SIZE (-1L)
 
 /* const for string validation */
-#define MIN_CHAR 32
-#define MAX_CHAR 127
-#define CHAR_NEW_LINE '\n'
+#define MIN_CHAR      (32)
+#define MAX_CHAR      (127)
+#define CHAR_NEW_LINE ('\n')
 
 // string validation
 bool is_valid_str (char *str) {
-  char *ptr;
+  char *ptr = NULL;
 
   for (ptr = str; *ptr; ++ptr) {
     if (*ptr >= MAX_CHAR || *ptr <= MIN_CHAR && *ptr != CHAR_NEW_LINE) {
@@ -34,13 +34,12 @@ struct trie_node {
   struct trie_node *next[CHAR_COUNT];
   int              leaf;
 };
-
 typedef struct trie_node trie_node_t;
 
 /* trie tree implemenation */
 trie_node_t *trie_create_node() {
-  trie_node_t *node =  malloc( sizeof( trie_node_t));
   int i = 0;
+  trie_node_t *node =  malloc( sizeof( trie_node_t));
 
   if (!node) {
     return NULL;
@@ -63,10 +62,10 @@ void trie_destroy_node (trie_node_t *node) {
 }
 
 bool trie_find_node (trie_node_t *tree, char *str, size_t str_len) {
-  trie_node_t *cur = tree;
   size_t i = 0;
   int pos = 0;
-    
+  trie_node_t *cur = tree;
+
   if (!cur) {
     return false;
   }
@@ -87,10 +86,10 @@ bool trie_find_node (trie_node_t *tree, char *str, size_t str_len) {
 }
 
 bool trie_insert_node (trie_node_t *tree, char *str, size_t str_len) {
-  trie_node_t *cur = tree;
   size_t i = 0;
   int pos = 0;
-  
+  trie_node_t *cur = tree;
+
   if (!cur) {
       return false;
   }
@@ -98,9 +97,9 @@ bool trie_insert_node (trie_node_t *tree, char *str, size_t str_len) {
     if (str[i] == CHAR_NEW_LINE) {
       continue;
     }
-		pos = CHAR_INDEX( str[i]);
-		if (!cur->next[pos]) {
-		  cur->next[pos] = trie_create_node();
+    pos = CHAR_INDEX( str[i]);
+    if (!cur->next[pos]) {
+       cur->next[pos] = trie_create_node();
       if(!cur->next[pos]) {
         return false;
       }
@@ -178,7 +177,7 @@ int main (int argc, char **argv) {
       fclose( file);
       return 1;
     }
-  }  
+  }
   trie_destroy_node( tree);
   fclose( file);
   return 0;

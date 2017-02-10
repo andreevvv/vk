@@ -8,7 +8,7 @@ struct vector_int {
 };
 typedef struct vector_int vector_int_t;
 
-#define INVALID_INDEX -1
+#define INVALID_INDEX (-1)
 
 int bsearch_1st_big_value (vector_int_t *value, size_t left, size_t right, int x) {
   while (left != right) {
@@ -16,7 +16,7 @@ int bsearch_1st_big_value (vector_int_t *value, size_t left, size_t right, int x
     if (value->base[middle] <= x) {
       left = middle + 1;
     } else {
-      right = middle; 
+      right = middle;
     }
   }
   if (value->base[right] > x) {
