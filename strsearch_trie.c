@@ -11,7 +11,7 @@ static const long INVALID_FILE_SIZE = -1L;
 
 // const for string validation
 #define MIN_CHAR 32
-#define MAX_CHAR 127 + 1
+#define MAX_CHAR 127
 #define CHAR_NEW_LINE '\n'
 
 // string validation
@@ -28,33 +28,17 @@ bool is_valid_str (char *str) {
 
 // struct for trie tree
 #define CHAR_COUNT (MAX_CHAR - MIN_CHAR)
-#define CHAR_INDEX(i) (MAX_CHAR - (i))
+#define CHAR_INDEX(i) ((int)(i) - (int)MIN_CHAR)
 
 struct trie_node {
   struct trie_node *next[CHAR_COUNT];
-  int              use_count;
-  char             value;
+  int              leaf;
 };
 
 typedef struct trie_node trie_node_t;
 
-struct trie_tree {
-  struct trie_node *root;
-};
-
-typedef struct trie_tree trie_tree_t;
 
 // trie tree implemenation
-trie_tree_t *trie_create_tree() {
-   trie_tree_t *tree = malloc( sizeof(trie_tree_t));
-
-  if (!tree) {
-    return NULL;
-  }
-  tree->root = NULL;
-  return tree;
-}
-
 trie_node_t *trie_create_node() {
   trie_node_t *node =  malloc( sizeof( trie_node_t));
   int i = 0;
@@ -62,8 +46,7 @@ trie_node_t *trie_create_node() {
   if (!node) {
     return NULL;
   }
-  node->use_count = 0;  
-  node->value = 0;
+  node->leaf = false;
   for (; i < CHAR_COUNT; ++i) {
     node->next[i] = NULL;
   }
@@ -80,88 +63,49 @@ void trie_destroy_node (trie_node_t *node) {
   }
 }
 
-void trie_destroy_tree (trie_tree_t *tree){
-   trie_node_t *cur = tree->root;
-
-    if (cur) {
-      trie_destroy_node( cur);
+bool trie_find_node (trie_node_t *tree, char *str, size_t str_len) {
+  trie_node_t *cur = tree;
+  size_t i = 0;
+  int pos = 0;
+    
+  if (!cur) {
+    return false;
+  }
+  for (i = 0; i < str_len; ++i) {
+    pos = CHAR_INDEX( str[i]);
+    if (!cur->next[pos]) {
+      return false;
     }
+    cur = cur->next[pos];
+  }
+  if( cur) {
+    return cur->leaf;
+  }
+  return false;
 }
 
-trie_node_t *trie_find_node (trie_tree_t *tree, char *str, size_t str_len) {
-  trie_node_t *cur = tree->root;
-  char *p = str;
- 
-  for (; *p != '\0'; ++p) {
+bool trie_insert_node (trie_node_t *tree, char *str, size_t str_len) {
+  trie_node_t *cur = tree;
+  size_t i = 0;
+  int pos = 0;
+  
+  if (!cur) {
+    cur = trie_create_node();
     if (!cur) {
-     //printf("trie_find_node false\n");
-      return NULL;
+      return false;
     }
-    printf("%c ", *p);
-    cur = cur->next[CHAR_INDEX(*p)];
   }
-  //printf("trie_find_node true %p\n", node);
-  return cur;
-}
-
-void trie_insert_with_restore_node (trie_tree_t *tree, char *str, size_t str_len) {
-  trie_node_t *cur = tree->root;
-  trie_node_t **prev_ptr = &tree->root;
-  char *p = str;
-  trie_node_t *next_node;
-  trie_node_t **next_prev_ptr;
-
-  while (cur) {
-    next_prev_ptr = &cur->next[CHAR_INDEX(*p)];
-    next_node = *next_prev_ptr;
-    ++p;
-    --cur->use_count;
-
-    if (0 == cur->use_count) {
-      free(cur);
-
-      if (prev_ptr) {
-        *prev_ptr = NULL;
+  for (i = 0; i < str_len; ++i) {
+		pos = CHAR_INDEX( str[i]);
+		if (!cur->next[pos]) {
+		  cur->next[pos] = trie_create_node();
+      if(!cur->next[pos]) {
+        return false;
       }
-
-      next_prev_ptr = NULL;
     }
-    cur = next_node;
-    prev_ptr = next_prev_ptr;
+    cur = cur->next[pos];
   }
-}
-
-bool trie_insert_node (trie_tree_t *tree, char *str, size_t str_len) {
-  trie_node_t **rcur = &tree->root;
-  trie_node_t *cur = NULL;
-  char *p = str;
-  char c = 0;
-  cur = trie_find_node( tree, str, str_len);
-
-  if (cur && cur->value != 0) {
-    return true;
-  }  
-  for (;;) {
-    cur = *rcur;
-    if (!cur) {
-      cur = trie_create_node();
-
-      if (!cur) {
-        trie_insert_with_restore_node( tree, str, str_len);
-        return 0;
-      }
-      cur->value = *p;
-      *rcur = cur;
-    }
-    ++cur->use_count;
-    c = *p;
-    //printf("%c ", c);
-    if (c == '\0') {      
-      break;
-    }
-    rcur = &cur->next[CHAR_INDEX(c)];
-    ++p;
-  }
+  cur->leaf = true;
   return true;
 }
 
@@ -174,7 +118,7 @@ int main (int argc, char **argv) {
   size_t str_len = 0;
   ssize_t str_read = 0;
   unsigned long line_num = 0L;
-  trie_tree_t *tree = NULL;
+  trie_node_t *tree = NULL;
 
   if (argc < 2) {
     printf("Usage: strsearch filename\n");
@@ -207,7 +151,7 @@ int main (int argc, char **argv) {
   }
   rewind( file);
 
-  tree = trie_create_tree();
+  tree = trie_create_node();
   if (!tree) {
     printf("Error memory allocation\n");
     fclose( file);
@@ -216,11 +160,11 @@ int main (int argc, char **argv) {
 
   while ((str_read = getline( &str, &str_len, file)) != -1) {
     if (is_valid_str( str)) {
-      if (trie_find_node( tree, str, str_read)) {
+      if (trie_find_node( tree, str, str_read - 1)) {
         printf("YES\n");
       } else {
         printf("NO\n");
-        if (!trie_insert_node( tree, str, str_read)) {
+        if (!trie_insert_node( tree, str, str_read - 1)) {
           printf("Error memory allocation\n");
           fclose( file);
           return 1;
@@ -234,7 +178,7 @@ int main (int argc, char **argv) {
       return 1;
     }
   }  
-  trie_destroy_tree( tree);
+  trie_destroy_node( tree);
   fclose( file);
   return 0;
 }
