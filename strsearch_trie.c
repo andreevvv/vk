@@ -5,11 +5,11 @@
 #include <stdio.h>
 #include <inttypes.h>
 
-// const for file validation
-static const long MAX_FILE_SIZE = 128L * 1024L * 1024L;
-static const long INVALID_FILE_SIZE = -1L;
+/* const for file validation */
+#define MAX_FILE_SIZE     128L * 1024L * 1024L
+#define INVALID_FILE_SIZE -1L
 
-// const for string validation
+/* const for string validation */
 #define MIN_CHAR 32
 #define MAX_CHAR 127
 #define CHAR_NEW_LINE '\n'
