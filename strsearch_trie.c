@@ -31,6 +31,7 @@ bool is_valid_str (char *str) {
 #define CHAR_INDEX(i) ((i) - (MIN_CHAR))
 
 struct trie_node {
+  /*TODO: implement hash instead of fixed array*/
   struct trie_node *next[CHAR_COUNT];
   int              leaf;
 };
