@@ -59,6 +59,7 @@ void trie_destroy_node (trie_node_t *node) {
       trie_destroy_node( node->next[i]);
     }
   }
+  free( node);
 }
 
 bool trie_find_node (trie_node_t *tree, char *str, size_t str_len) {

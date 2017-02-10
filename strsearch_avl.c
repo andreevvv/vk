@@ -97,6 +97,7 @@ void avl_destroy_tree (avl_tree_t *tree) {
     if (cur) {
       avl_destroy_node( cur);
     }
+    free( tree);
 }
 
 int avl_height_node (avl_node_t *node) {
