@@ -26,9 +26,9 @@ bool is_valid_str (char *str) {
   return true;
 }
 
-// struct for trie tree
-#define CHAR_COUNT (MAX_CHAR - MIN_CHAR)
-#define CHAR_INDEX(i) ((int)(i) - (int)MIN_CHAR)
+/* struct for trie tree */
+#define CHAR_COUNT ((MAX_CHAR) - (MIN_CHAR))
+#define CHAR_INDEX(i) ((i) - (MIN_CHAR))
 
 struct trie_node {
   struct trie_node *next[CHAR_COUNT];
@@ -37,8 +37,7 @@ struct trie_node {
 
 typedef struct trie_node trie_node_t;
 
-
-// trie tree implemenation
+/* trie tree implemenation */
 trie_node_t *trie_create_node() {
   trie_node_t *node =  malloc( sizeof( trie_node_t));
   int i = 0;
@@ -72,6 +71,9 @@ bool trie_find_node (trie_node_t *tree, char *str, size_t str_len) {
     return false;
   }
   for (i = 0; i < str_len; ++i) {
+    if (str[i] == CHAR_NEW_LINE) {
+      continue;
+    }
     pos = CHAR_INDEX( str[i]);
     if (!cur->next[pos]) {
       return false;
@@ -90,12 +92,12 @@ bool trie_insert_node (trie_node_t *tree, char *str, size_t str_len) {
   int pos = 0;
   
   if (!cur) {
-    cur = trie_create_node();
-    if (!cur) {
       return false;
-    }
   }
   for (i = 0; i < str_len; ++i) {
+    if (str[i] == CHAR_NEW_LINE) {
+      continue;
+    }
 		pos = CHAR_INDEX( str[i]);
 		if (!cur->next[pos]) {
 		  cur->next[pos] = trie_create_node();
@@ -109,8 +111,7 @@ bool trie_insert_node (trie_node_t *tree, char *str, size_t str_len) {
   return true;
 }
 
-
-// main function impemenation
+/* main function impemenation */
 int main (int argc, char **argv) {
   FILE *file = NULL;
   long fsize = 0L;
@@ -160,11 +161,11 @@ int main (int argc, char **argv) {
 
   while ((str_read = getline( &str, &str_len, file)) != -1) {
     if (is_valid_str( str)) {
-      if (trie_find_node( tree, str, str_read - 1)) {
+      if (trie_find_node( tree, str, str_read)) {
         printf("YES\n");
       } else {
         printf("NO\n");
-        if (!trie_insert_node( tree, str, str_read - 1)) {
+        if (!trie_insert_node( tree, str, str_read)) {
           printf("Error memory allocation\n");
           fclose( file);
           return 1;
